@@ -2,56 +2,69 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(
-            name: 'VERSION',
-            choices: ['v1', 'v2', 'v3'],
-            description: 'Select the Wishlist version to build'
-        )
-    }
-
     environment {
         IMAGE_NAME = '24mis0260/wishlist'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                checkout scm
+                echo 'Wishlist source code checked out'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build V1 - Add') {
             steps {
-                bat 'docker build --build-arg APP_VERSION=%VERSION% -t %IMAGE_NAME%:%VERSION% .'
+                bat 'docker build --build-arg APP_VERSION=v1 -t 24mis0260/wishlist:v1 .'
             }
         }
 
-        stage('Docker Hub Login and Push') {
+        stage('Build V2 - Remove') {
+            steps {
+                bat 'docker build --build-arg APP_VERSION=v2 -t 24mis0260/wishlist:v2 .'
+            }
+        }
+
+        stage('Build V3 - View') {
+            steps {
+                bat 'docker build --build-arg APP_VERSION=v3 -t 24mis0260/wishlist:v3 .'
+            }
+        }
+
+        stage('Docker Hub Login') {
             steps {
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKERHUB_USER',
-                        passwordVariable: 'DOCKERHUB_TOKEN'
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
                     bat '''
-                        powershell -NoProfile -Command "$env:DOCKERHUB_TOKEN | docker login -u $env:DOCKERHUB_USER --password-stdin"
-                        docker push %IMAGE_NAME%:%VERSION%
-                        docker logout
+                        echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin
                     '''
                 }
+            }
+        }
+
+        stage('Push Images to Docker Hub') {
+            steps {
+                bat '''
+                    docker push 24mis0260/wishlist:v1
+                    docker push 24mis0260/wishlist:v2
+                    docker push 24mis0260/wishlist:v3
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Wishlist Docker image built and pushed successfully!'
+            echo 'SUCCESS: All three Wishlist images pushed to Docker Hub!'
         }
         failure {
-            echo 'Pipeline failed. Check the Jenkins console output.'
+            echo 'FAILED: Check the stage and console output.'
         }
     }
 }
