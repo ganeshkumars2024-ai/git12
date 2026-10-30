@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,7 +26,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: wishlist-v2
+  name: wishlist-v2-service
 spec:
   selector:
     app: wishlist-v2
