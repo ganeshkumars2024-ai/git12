@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wishlist-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wishlist-v1
+  template:
+    metadata:
+      labels:
+        app: wishlist-v1
+    spec:
+      containers:
+        - name: wishlist
+          image: 24mis0260/wishlist:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          env:
+            - name: APP_VERSION
+              value: "v1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlist-v1
+spec:
+  selector:
+    app: wishlist-v1
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: ClusterIP

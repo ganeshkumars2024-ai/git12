@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist - {{ version | upper }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f4f7fb;
+            color: #243247;
+        }
+        main {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #0001;
+        }
+        input, button {
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        input {
+            border: 1px solid #ccd3dd;
+            width: min(90%, 380px);
+        }
+        button {
+            border: none;
+            background: #2459c4;
+            color: white;
+            cursor: pointer;
+        }
+        .message { padding: 10px; border-radius: 6px; }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+        li { padding: 8px 0; }
+        .version { color: #2459c4; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>My Wishlist</h1>
+    <h3 class="version">Application Version: {{ version | upper }}</h3>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    {% if can_add %}
+        <h2>Add Wishlist Item</h2>
+        <form action="{{ url_for('add_item') }}" method="post">
+            <input name="item_name" maxlength="100"
+                   placeholder="Enter item name" required>
+            <button type="submit">Add Item</button>
+        </form>
+    {% endif %}
+
+    {% if can_remove %}
+        <h2>Remove Wishlist Item</h2>
+        <form action="{{ url_for('remove_item') }}" method="post">
+            <input name="item_name" maxlength="100"
+                   placeholder="Enter exact item name" required>
+            <button type="submit">Remove Item</button>
+        </form>
+    {% endif %}
+
+    {% if can_view %}
+        <h2>Saved Wishlist Items</h2>
+        {% if items %}
+            <ul>
+                {% for item in items %}
+                    <li>{{ item.name }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p id="empty-message">Your wishlist is empty. Add an item to begin.</p>
+        {% endif %}
+        <p>Total items: {{ items | length }}</p>
+    {% endif %}
+</main>
+</body>
+</html>
